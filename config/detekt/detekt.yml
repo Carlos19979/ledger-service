@@ -1,0 +1,13 @@
+# Only deviations from detekt's defaults live here.
+complexity:
+  # Aggregates are rebuilt from storage with every field; a builder would only hide that.
+  LongParameterList:
+    functionThreshold: 10
+    constructorThreshold: 10
+  TooManyFunctions:
+    thresholdInClasses: 15
+style:
+  MagicNumber:
+    excludes: ['**/test/**', '**/testFixtures/**']
+  ReturnCount:
+    max: 4
