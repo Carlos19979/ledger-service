@@ -34,6 +34,7 @@ springdoc-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc
 flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql" }
 postgresql = { module = "org.postgresql:postgresql" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
+awaitility = { module = "org.awaitility:awaitility-kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
 testcontainers-junit = { module = "org.testcontainers:testcontainers-junit-jupiter" }

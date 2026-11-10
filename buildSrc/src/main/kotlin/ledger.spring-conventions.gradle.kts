@@ -8,4 +8,7 @@ dependencies {
     implementation(platform(lib("spring-boot-bom")))
     testImplementation(platform(lib("spring-boot-bom")))
     implementation(lib("kotlin-reflect"))
+
+    // Spring integration tests are plain JUnit; Kotest stays for unit and property tests.
+    testImplementation(lib("spring-boot-starter-test"))
 }
