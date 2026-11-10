@@ -23,7 +23,7 @@ jobs:
       # Docker) and fails below 80% line coverage.
       - run: ./gradlew build koverVerify koverHtmlReport
       - if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports
           path: |
