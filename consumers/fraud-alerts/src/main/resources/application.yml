@@ -1,0 +1,37 @@
+server:
+  port: ${PORT:8082}
+
+spring:
+  application:
+    name: fraud-alerts
+  datasource:
+    url: ${FRAUD_DB_URL:jdbc:postgresql://localhost:5432/fraud}
+    username: ${FRAUD_DB_USER:ledger}
+    password: ${FRAUD_DB_PASSWORD:ledger}
+  flyway:
+    locations: classpath:db/migration/fraud
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: fraud-alerts
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+fraud:
+  large-amount-minor: 500000   # 5,000.00 in the account currency
+  velocity:
+    max-transfers: 5
+    window: 2m
+  rejections:
+    max-rejections: 3
+    window: 10m
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
