@@ -122,8 +122,15 @@ class LedgerServiceTest(
         val transferId = response.body!!["transfer"]["id"].asString()
         TopicReader(kafka.bootstrapServers, listOf(LedgerTopics.TRANSFERS)).use { reader ->
             await atMost Duration.ofSeconds(20) untilAsserted {
-                reader.poll().single { it.value().contains(transferId) }.header(EventHeaders.EVENT_TYPE) shouldBe
-                    "TransferRejected"
+                // An assertion, not single(): Awaitility only retries on AssertionError.
+                reader
+                    .poll()
+                    .filter {
+                        it.value().contains(
+                            transferId,
+                        )
+                    }.map { it.header(EventHeaders.EVENT_TYPE) } shouldBe
+                    listOf("TransferRejected")
             }
         }
     }

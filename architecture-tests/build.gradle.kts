@@ -8,6 +8,6 @@ dependencies {
 }
 
 tasks.test {
-    // Konsist reads the sources of every module, so rerun whenever any of them changes.
-    inputs.files(rootProject.fileTree(rootDir) { include("**/src/main/kotlin/**/*.kt") })
+    // Konsist reads every module's sources, which Gradle cannot track as inputs; it is fast, so always run it.
+    outputs.upToDateWhen { false }
 }
