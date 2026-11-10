@@ -18,7 +18,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       # Compiles with warnings as errors, runs detekt, ktlint, every test (Testcontainers uses the runner's
       # Docker) and fails below 80% line coverage.
       - run: ./gradlew build koverVerify koverHtmlReport
