@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: ledger-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${LEDGER_DB_URL:jdbc:postgresql://localhost:5432/ledger}
+    username: ${LEDGER_DB_USER:ledger}
+    password: ${LEDGER_DB_PASSWORD:ledger}
+    hikari:
+      maximum-pool-size: 20
+  flyway:
+    locations: classpath:db/migration/ledger
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+        delivery.timeout.ms: 10000
+        request.timeout.ms: 5000
+        max.block.ms: 5000
+  mvc:
+    problemdetails:
+      enabled: true
+
+ledger:
+  outbox:
+    batch-size: 100
+    publish-timeout: 10s
+    poll-interval: 200ms
+  topic-partitions: 3
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

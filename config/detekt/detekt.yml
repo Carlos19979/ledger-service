@@ -6,6 +6,11 @@ complexity:
     constructorThreshold: 10
   TooManyFunctions:
     thresholdInClasses: 15
+    # Spring configuration classes are lists of @Bean factories, not behaviour.
+    ignoreAnnotatedFunctions: ['Bean']
+performance:
+  SpreadOperator:
+    excludes: ['**/*Application.kt']
 style:
   MagicNumber:
     excludes: ['**/test/**', '**/testFixtures/**']
