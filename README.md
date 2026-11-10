@@ -70,7 +70,7 @@ The whole system runs with Docker Compose. You need Docker; no local JDK or Grad
 
 ```bash
 docker compose up --build          # PostgreSQL, Kafka, ledger (8080), activity (8081), fraud (8082)
-docker compose --profile observability up --build   # + Prometheus on :9090
+docker compose --profile observability up --build   # + Grafana :3000, Prometheus :9090, Loki, Alloy
 ```
 
 Swagger UI: <http://localhost:8080/swagger-ui.html>
@@ -92,6 +92,33 @@ curl -si -H "$J" -H 'Idempotency-Key: dinner-1' \
 curl -s localhost:8080/api/v1/accounts/$ALICE/entries | jq   # statement, newest first, cursor-paged
 curl -s localhost:8081/api/v1/activity/$BOB | jq             # read model, fed by Kafka
 curl -s "localhost:8082/api/v1/alerts?accountId=$ALICE" | jq # fraud alerts
+```
+
+## Observability
+
+With `--profile observability`, Grafana Alloy collects every container's logs into Loki. Prometheus scrapes
+the three services' metrics, and Grafana opens directly on a provisioned **Ledger overview** dashboard at
+<http://localhost:3000>; no login is needed locally. To fill it with a few minutes of realistic traffic (steady
+transfers, rejections, a velocity burst and large amounts), run `deploy/traffic.sh`.
+
+![Ledger overview dashboard](docs/img/grafana-dashboard.png)
+
+| Panel | Source |
+|---|---|
+| Transfers per second, settled (201) vs rejected (422) | Prometheus, `http_server_requests` |
+| Rejections by reason | Loki: the API logs one line per decided transfer |
+| Outbox backlog: the number to alert on, it grows when Kafka is unreachable | Prometheus, `ledger_outbox_pending` |
+| Events published to Kafka per second | Prometheus, `ledger_outbox_published_total` |
+| Transfer latency p95 / p99 | Prometheus histogram |
+| Fraud alerts by rule, warnings and errors per service | Loki |
+| Logs of the three services, filterable by service and text | Loki |
+
+These queries are also handy in Grafana's Explore view:
+
+```logql
+{service="ledger"} |= "rejected"                      # every rejected transfer
+{service="fraud-alerts"} |= "Fraud alert"             # every alert raised
+{project="ledger-service", level=~"WARN|ERROR"}       # anything worth a look
 ```
 
 ## API
@@ -137,7 +164,9 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 | Layer | Style | Infrastructure |
 |---|---|---|
 | Domain | Kotest specs and property-based tests | none |
-| Application | Kotest with in-memory ports that really roll back | none |
+| Application | Kotest with in-memory ports that really roll back (outcomes) | none |
+| Application, interactions | MockK: call order with the ports, and calls that must never happen (no balance update on a rejection, no broker call without the publishing lock) | none |
+| Kafka listeners | MockK: routing and mapping of records without Spring, broker or database | none |
 | PostgreSQL adapter | Kotest, a fresh migrated database per spec | Testcontainers PostgreSQL |
 | REST adapter | `@WebMvcTest` with real use cases over the in-memory ports | none |
 | Service end to end | `@SpringBootTest` over HTTP, Kafka outage test | Testcontainers PostgreSQL + Kafka |
@@ -169,6 +198,6 @@ These are left out to keep the scope honest, not overlooked:
 ## Stack
 
 Kotlin 2.3 · Java 21 · Spring Boot 4.1 (Web MVC, JDBC, Kafka, Actuator) · PostgreSQL 17 · Apache Kafka 4 ·
-Flyway · Jackson 3 · Gradle 9 (Kotlin DSL, convention plugins, version catalog) · Kotest ·
-Testcontainers · Konsist · detekt · ktlint · Kover · Micrometer/Prometheus · springdoc-openapi · Docker ·
-GitHub Actions
+Flyway · Jackson 3 · Gradle 9 (Kotlin DSL, convention plugins, version catalog) · Kotest · MockK ·
+Testcontainers · Konsist · detekt · ktlint · Kover · Micrometer · Prometheus · Grafana · Loki · Alloy ·
+springdoc-openapi · Docker · GitHub Actions

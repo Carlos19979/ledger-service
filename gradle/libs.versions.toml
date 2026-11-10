@@ -3,6 +3,7 @@ kotlin = "2.3.21"
 spring-boot = "4.1.2"
 springdoc = "3.2.0"
 kotest = "6.2.6"
+mockk = "1.14.11"
 konsist = "0.18.1"
 detekt = "1.23.8"
 ktlint-plugin = "14.2.0"
@@ -43,4 +44,5 @@ testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka" }
 kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }

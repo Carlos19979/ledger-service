@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Pattern
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -60,6 +61,8 @@ class TransferController(private val transferMoney: TransferMoney, private val g
 
 /** One mapping from use-case outcome to HTTP, shared by transfers and deposits. */
 internal object TransferResponses {
+    private val log = LoggerFactory.getLogger(TransferResponses::class.java)
+
     fun of(result: TransferResult): ResponseEntity<Any> =
         when (result) {
             is TransferResult.Completed -> completed(result)
@@ -80,6 +83,20 @@ internal object TransferResponses {
 
     private fun completed(result: TransferResult.Completed): ResponseEntity<Any> {
         val transfer = result.transfer
+        // One line per decided transfer; the Grafana dashboard derives rejections-by-reason from it.
+        if (!result.replayed) {
+            when (val rejection = transfer.rejection) {
+                null ->
+                    log.info(
+                        "Transfer {} settled: {} {} -> {}",
+                        transfer.id,
+                        transfer.amount,
+                        transfer.sourceAccountId,
+                        transfer.targetAccountId,
+                    )
+                else -> log.info("Transfer {} rejected: {} ({})", transfer.id, rejection.code, transfer.kind)
+            }
+        }
         val builder =
             if (transfer.status == TransferStatus.SETTLED) {
                 ResponseEntity.created(URI.create("/api/v1/transfers/${transfer.id}"))

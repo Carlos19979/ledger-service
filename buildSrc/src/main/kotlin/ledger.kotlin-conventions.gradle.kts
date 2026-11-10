@@ -31,6 +31,7 @@ dependencies {
     testImplementation(lib("kotest-runner"))
     testImplementation(lib("kotest-assertions"))
     testImplementation(lib("kotest-property"))
+    testImplementation(lib("mockk"))
 }
 
 tasks.withType<Test>().configureEach {
